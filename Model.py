@@ -19,30 +19,16 @@ cifar10_te = Cifar10(mode='test', transform=transform)  # dataset
 channel_list = [32, 64, 128, 256, 512]
 SMNet = StackMobileNet(num_classes=10)
 SMNet.add_stack(channel_list.pop(0))
-data, label = cifar10[0]
+loss = SimiLoss(cls=10,margin=1000)
+net = paddle.Model(SMNet)
+# clip = paddle.nn.ClipGradByNorm(clip_norm=1.0)
+net.prepare(optimizer=paddle.optimizer.Adam(parameters=net.parameters()),loss=SimiLoss(cls=10,margin=1000))
+net.fit(train_data=cifar10,
+        epochs=12,
+        batch_size=8,
+        verbose=1)
 
-y = SMNet(paddle.to_tensor(data).unsqueeze(0))
-loss = ContrastLoss(cls=10)
-print(paddle.to_tensor([label]).shape)
-print(loss(y, paddle.to_tensor([label])))
-# net = paddle.Model(SMNet)
-# net.prepare(optimizer=paddle.optimizer.Adam(parameters=net.parameters(), learning_rate=0.001),
-#               loss=ContrastLoss(cls=10))
-# net.fit(train_data=cifar10,
-#         epochs=12,
-#         batch_size=8,
-#         verbose=1)
 
-# while len(channel_list) != 0:
-#     SMNet.add_layer(channel_list.pop(0))
-#     net = paddle.Model(SMNet)
-#     net.prepare(optimizer=paddle.optimizer.Adam(parameters=net.parameters()),
-#               loss=ContrastLoss(cls=10))
-#     net.fit(train_data=cifar10,
-#             epochs=64,
-#             batch_size=128,
-#             verbose=1)
-    
 
 
     
